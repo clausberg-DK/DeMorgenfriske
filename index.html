@@ -169,6 +169,8 @@ td{padding:9px 14px;vertical-align:middle;}td.r{text-align:right;font-family:'DM
   .hth-grid{grid-template-columns:1fr;}.hth-vs{display:none;}
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -389,9 +391,8 @@ td{padding:9px 14px;vertical-align:middle;}td.r{text-align:right;font-family:'DM
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjkNIBGrQyyR05fjqWPgsMQKvAcpdHpU8",
@@ -402,8 +403,8 @@ const firebaseConfig = {
   appId: "1:253406955474:web:b36a936d1cee44cd35ea0b"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 var players = [], rounds = [], eid = null;
 var lineChartInst = null, barChartInst = null;
@@ -424,7 +425,7 @@ function setSyncStatus(ok, txt) {
 }
 
 // REALTIME
-onSnapshot(collection(db, 'Players'), function(snap) {
+db.collection( 'Players'), function(snap) {
   players = [];
   snap.forEach(function(d) { players.push(Object.assign({id:d.id}, d.data())); });
   players.sort(function(a,b){ return a.name.localeCompare(b.name,'da'); });
@@ -432,7 +433,7 @@ onSnapshot(collection(db, 'Players'), function(snap) {
   renderAll();
 }, function(){ setSyncStatus(false, 'Forbindelsesfejl'); });
 
-onSnapshot(query(collection(db,'rounds'), orderBy('date')), function(snap) {
+db.collection('rounds').orderBy('date').onSnapshot(function(snap) {
   rounds = [];
   snap.forEach(function(d){ rounds.push(Object.assign({id:d.id}, d.data())); });
   renderAll();
@@ -681,18 +682,18 @@ window.addPlayer = async function(){
   if(isNaN(hc)||hc<0||hc>54) return showAl(al,'Handicap skal være 0–54.','er');
   if(players.length>=16) return showAl(al,'Maks. 16 spillere.','er');
   if(players.find(function(p){return p.name.toLowerCase()===nm.toLowerCase();})) return showAl(al,'Navn findes allerede.','er');
-  await setDoc(doc(collection(db,'Players')),{name:nm,hcp:hc});
+  await db.collection('Players').add({name:nm,hcp:hc});
   document.getElementById('nname').value=''; document.getElementById('nhcp').value='';
   showAl(document.getElementById('sal'),nm+' tilføjet! ✅','ok');
 };
 
 window.delPlayer = async function(id){
   if(!confirm('Slet spilleren og alle scores?')) return;
-  await deleteDoc(doc(db,'Players',id));
+  await db.collection('Players').doc(id).delete();
   showAl(document.getElementById('sal'),'Spiller slettet.','ok');
 };
 
-window.updHcp = async function(id,v){ var val=parseFloat(v); if(!isNaN(val)&&val>=0&&val<=54) await setDoc(doc(db,'Players',id),{hcp:val},{merge:true}); };
+window.updHcp = async function(id,v){ var val=parseFloat(v); if(!isNaN(val)&&val>=0&&val<=54) await db.collection('Players').doc(id).update({hcp:val}); };
 
 function renderP(){
   var g=document.getElementById('pgrid');
@@ -725,7 +726,7 @@ window.gemRunde=async function(){
   var sc={},cnt=0;
   for(var i=0;i<players.length;i++){ var p=players[i],c=document.getElementById('ck_'+p.id); if(c&&c.checked){ var v=parseInt(document.getElementById('sc_'+p.id).value); if(isNaN(v)||v<0) return showAl(al,'Angiv score for '+p.name+'.','er'); sc[p.id]=v; cnt++; } }
   if(cnt<2) return showAl(al,'Minimum 2 spillere skal deltage.','er');
-  await setDoc(doc(collection(db,'rounds')),{date:dt,note:nt,scores:sc});
+  await db.collection('rounds').add({date:dt,note:nt,scores:sc});
   sendNotif('⛳ Ny runde registreret!','Runde d. '+fd(dt)+' med '+cnt+' spillere er gemt.');
   showAl(al,'✅ Runde d. '+fd(dt)+' gemt med '+cnt+' spillere!','ok');
   document.getElementById('rnote').value=''; renderSG();
@@ -734,7 +735,7 @@ window.gemRunde=async function(){
 // REDIGER
 window.openEdit=function(rid){ eid=rid; var r=rounds.find(function(x){return x.id===rid;}); if(!r)return; document.getElementById('edate').value=r.date; document.getElementById('enote').value=r.note||''; document.getElementById('eal').innerHTML=''; document.getElementById('esg').innerHTML=players.map(function(p){ var has=r.scores&&r.scores[p.id]!==undefined,sc=has?r.scores[p.id]:''; return '<div class="esr"><input type="checkbox" id="eck_'+p.id+'" '+(has?'checked':'')+' onchange="togESc(\''+p.id+'\')" /><label for="eck_'+p.id+'">'+e(p.name)+'</label><input type="number" id="esc_'+p.id+'" value="'+sc+'" min="0" max="72" placeholder="–" '+(has?'':'disabled')+' style="background:var(--card);color:var(--txt);"/></div>'; }).join(''); document.getElementById('emod').classList.add('open'); };
 window.togESc=function(id){ var c=document.getElementById('eck_'+id),i=document.getElementById('esc_'+id); i.disabled=!c.checked; if(c.checked)i.focus(); else i.value=''; };
-window.saveEdit=async function(){ var al=document.getElementById('eal'),dt=document.getElementById('edate').value,nt=document.getElementById('enote').value.trim(); if(!dt)return showAl(al,'Vælg en dato.','er'); var sc={},cnt=0; for(var i=0;i<players.length;i++){ var p=players[i],c=document.getElementById('eck_'+p.id); if(c&&c.checked){ var v=parseInt(document.getElementById('esc_'+p.id).value); if(isNaN(v)||v<0)return showAl(al,'Angiv score for '+p.name+'.','er'); sc[p.id]=v; cnt++; } } if(cnt<2)return showAl(al,'Minimum 2 spillere.','er'); await setDoc(doc(db,'rounds',eid),{date:dt,note:nt,scores:sc}); closeModal(); renderH(); showAl(document.getElementById('hal'),'✅ Runde opdateret!','ok'); };
+window.saveEdit=async function(){ var al=document.getElementById('eal'),dt=document.getElementById('edate').value,nt=document.getElementById('enote').value.trim(); if(!dt)return showAl(al,'Vælg en dato.','er'); var sc={},cnt=0; for(var i=0;i<players.length;i++){ var p=players[i],c=document.getElementById('eck_'+p.id); if(c&&c.checked){ var v=parseInt(document.getElementById('esc_'+p.id).value); if(isNaN(v)||v<0)return showAl(al,'Angiv score for '+p.name+'.','er'); sc[p.id]=v; cnt++; } } if(cnt<2)return showAl(al,'Minimum 2 spillere.','er'); await db.collection('rounds').doc(eid).set({date:dt,note:nt,scores:sc}); closeModal(); renderH(); showAl(document.getElementById('hal'),'✅ Runde opdateret!','ok'); };
 window.closeModal=function(){ document.getElementById('emod').classList.remove('open'); eid=null; };
 document.getElementById('emod').addEventListener('click',function(e){ if(e.target===this)window.closeModal(); });
 
@@ -749,12 +750,12 @@ function renderH(){
   }).join('');
 }
 window.togR=function(id){ document.getElementById('r_'+id).classList.toggle('open'); };
-window.delRound=async function(id,ev){ ev.stopPropagation(); if(!confirm('Slet denne runde?'))return; await deleteDoc(doc(db,'rounds',id)); renderH(); };
+window.delRound=async function(id,ev){ ev.stopPropagation(); if(!confirm('Slet denne runde?'))return; await db.collection('rounds').doc(id).delete(); renderH(); };
 
 // BULK HCP
 window.openHcpModal=function(){ if(!players.length){alert('Ingen spillere endnu.');return;} document.getElementById('hcpal').innerHTML=''; document.getElementById('hcpList').innerHTML=players.map(function(p){ return '<div class="hcp-row"><div><div class="hname">'+e(p.name)+'</div><div class="hold">Nuværende HCP: '+p.hcp+'</div></div><input type="number" id="hcpi_'+p.id+'" value="'+p.hcp+'" min="0" max="54" step="0.1" oninput="markHcp(this,'+p.hcp+')"/></div>'; }).join(''); document.getElementById('hcpmod').classList.add('open'); };
 window.markHcp=function(inp,orig){ parseFloat(inp.value)!==orig?inp.classList.add('hcp-chg'):inp.classList.remove('hcp-chg'); };
-window.saveAllHcp=async function(){ var changed=0; for(var i=0;i<players.length;i++){ var p=players[i],inp=document.getElementById('hcpi_'+p.id); if(!inp)continue; var v=parseFloat(inp.value); if(!isNaN(v)&&v>=0&&v<=54&&v!==p.hcp){ await setDoc(doc(db,'Players',p.id),{hcp:v},{merge:true}); changed++; } } if(changed>0){ showAl(document.getElementById('hcpal'),changed+' handicap(s) opdateret! ✅','ok'); setTimeout(function(){closeHcpModal();},1400); } else showAl(document.getElementById('hcpal'),'Ingen ændringer at gemme.','er'); };
+window.saveAllHcp=async function(){ var changed=0; for(var i=0;i<players.length;i++){ var p=players[i],inp=document.getElementById('hcpi_'+p.id); if(!inp)continue; var v=parseFloat(inp.value); if(!isNaN(v)&&v>=0&&v<=54&&v!==p.hcp){ await db.collection('Players').doc(p.id).update({hcp:v}); changed++; } } if(changed>0){ showAl(document.getElementById('hcpal'),changed+' handicap(s) opdateret! ✅','ok'); setTimeout(function(){closeHcpModal();},1400); } else showAl(document.getElementById('hcpal'),'Ingen ændringer at gemme.','er'); };
 window.closeHcpModal=function(){ document.getElementById('hcpmod').classList.remove('open'); };
 document.getElementById('hcpmod').addEventListener('click',function(e){ if(e.target===this)window.closeHcpModal(); });
 
@@ -1051,8 +1052,8 @@ window.genindlaesSpillere = async function(){
 Brug kun hvis spillerlisten er tom eller forkert!
 
 Fortsæt?')) return;
-  var snap = await getDocs(collection(db,'Players'));
-  if(snap.size > 0){
+  var snap = await db.collection('Players'));
+  if(!snap.empty){
     if(!confirm('Der er allerede '+snap.size+' spillere i databasen.
 Vil du stadig fortsætte? Det kan skabe dubletter!')) return;
   }
@@ -1066,7 +1067,7 @@ Vil du stadig fortsætte? Det kan skabe dubletter!')) return;
   ];
   showAl(document.getElementById('sal'),'Opretter spillere...','ok');
   for(var i=0;i<liste.length;i++){
-    await setDoc(doc(collection(db,'Players')),liste[i]);
+    await db.collection('Players').add(liste[i]);
   }
   showAl(document.getElementById('sal'),'✅ Alle 16 spillere er oprettet!','ok');
 };
