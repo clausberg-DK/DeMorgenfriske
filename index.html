@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="da" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DeMorgenfriske EGK</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* LIGHT THEME */
+:root{
+  --gd:#1a2e1a;--gm:#2d4a2d;--gl:#3d6b3d;--gb:#5a9e5a;--go:#c9a84c;--gl2:#e8c96a;
+  --wh:#fafaf7;--bg:#f0ede4;--bd:#ddd8cc;--rd:#c0392b;--mt:#6b7c6b;
+  --txt:#1a2e1a;--card:#fafaf7;--nav-bg:#2d4a2d;
+}
+/* DARK THEME */
+[data-theme="dark"]{
+  --wh:#1e2d1e;--bg:#141f14;--bd:#2d4a2d;--mt:#8aab8a;
+  --txt:#e8f5e8;--card:#1e2d1e;--nav-bg:#0e1e0e;
+}
+*{box-sizing:border-box;margin:0;padding:0;transition:background-color .3s,color .3s,border-color .3s;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;}
+.logo-header{background:linear-gradient(160deg,#0e1e0e 0%,#1a2e1a 40%,#243824 100%);padding:22px 40px 18px;border-bottom:3px solid var(--go);position:relative;overflow:hidden;}
+.logo-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(201,168,76,.08),transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(90,158,90,.06),transparent 60%);}
+.logo-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1200px;margin:0 auto;}
+.logo-left{display:flex;align-items:center;gap:18px;}
+.logo-badge{width:72px;height:72px;flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(201,168,76,.4));}
+.club-name{font-family:'Playfair Display',serif;color:var(--gl2);font-size:1.7rem;font-weight:900;letter-spacing:.5px;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+.club-name span{color:white;font-style:italic;}
+.club-est{color:var(--go);font-family:'DM Mono',monospace;font-size:.78rem;letter-spacing:3px;margin-top:5px;}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.sbadge{background:rgba(201,168,76,.15);border:1px solid var(--go);color:var(--gl2);padding:4px 12px;border-radius:20px;font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:1px;}
+.sync-row{display:flex;align-items:center;gap:10px;}
+.sync-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#aaa;margin-right:4px;vertical-align:middle;}
+.sync-dot.ok{background:var(--gb);}.sync-dot.err{background:var(--rd);}
+.sync-txt{font-size:.68rem;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;}
+.theme-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:20px;padding:4px 12px;font-size:.75rem;cursor:pointer;transition:all .2s;}
+.theme-btn:hover{background:rgba(255,255,255,.2);}
+nav{background:var(--nav-bg);display:flex;padding:0 40px;border-bottom:2px solid var(--gl);overflow-x:auto;}
+nav button{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;padding:10px 16px;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+nav button:hover{color:rgba(255,255,255,.85);}
+nav button.active{color:var(--gl2);border-bottom-color:var(--go);}
+main{padding:24px 40px;max-width:1200px;margin:0 auto;}
+.sec{display:none;}.sec.active{display:block;}
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.sc{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--go);}
+.sc .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--mt);font-family:'DM Mono',monospace;margin-bottom:5px;}
+.sc .val{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--txt);line-height:1;}
+.sc .sub{font-size:.7rem;color:var(--mt);margin-top:3px;}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:22px;}
+.ch{background:var(--gd);color:var(--gl2);padding:12px 20px;font-family:'Playfair Display',serif;font-size:1rem;}
+table{width:100%;border-collapse:collapse;font-size:.875rem;}
+thead th{background:var(--gm);color:rgba(255,255,255,.7);padding:9px 14px;text-align:left;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;}
+thead th.r{text-align:right;}
+tbody tr{border-bottom:1px solid var(--bd);}tbody tr:hover{background:rgba(90,158,90,.06);}tbody tr:last-child{border-bottom:none;}
+td{padding:9px 14px;vertical-align:middle;}td.r{text-align:right;font-family:'DM Mono',monospace;}
+.rb{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:'Playfair Display',serif;font-weight:700;font-size:.82rem;}
+.r1{background:var(--go);color:var(--gd);}.r2{background:#b0b8b0;color:white;}.r3{background:#a07040;color:white;}.rx{background:var(--bd);color:var(--mt);}
+.pn{font-weight:500;}.hb{display:inline-block;background:rgba(45,74,45,.1);color:var(--gl);border:1px solid rgba(45,74,45,.2);border-radius:4px;padding:1px 6px;font-family:'DM Mono',monospace;font-size:.72rem;margin-left:5px;}
+.sb{font-family:'DM Mono',monospace;font-weight:500;}.sg{color:var(--go);font-weight:600;}
+.bar{display:flex;align-items:center;gap:7px;}.barbg{flex:1;height:5px;background:var(--bd);border-radius:3px;max-width:70px;}.barfill{height:100%;border-radius:3px;background:var(--gb);}
+.ok{color:var(--gb);font-size:.7rem;font-family:'DM Mono',monospace;}.nq{color:var(--mt);font-size:.7rem;font-family:'DM Mono',monospace;}
+.form-up{color:#27ae60;font-size:1rem;}.form-dn{color:var(--rd);font-size:1rem;}.form-eq{color:var(--mt);font-size:.8rem;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.fg1{display:flex;flex-direction:column;gap:5px;}
+.fg1 label{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--mt);font-family:'DM Mono',monospace;}
+.fg1 input,.fg1 select{background:var(--card);border:1.5px solid var(--bd);border-radius:7px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--txt);outline:none;transition:border-color .2s;}
+.fg1 input:focus,.fg1 select:focus{border-color:var(--gb);}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px;}
+.si{background:var(--card);border:1.5px solid var(--bd);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:4px;}
+.si .sl{font-size:.68rem;color:var(--mt);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.si input[type=number]{width:100%;border:1px solid var(--bd);border-radius:5px;padding:4px 6px;font-family:'DM Mono',monospace;font-size:.95rem;text-align:center;color:var(--txt);font-weight:500;outline:none;background:var(--card);}
+.si input[type=number]:focus{border-color:var(--gb);}
+.si .ck{display:flex;align-items:center;gap:5px;font-size:.72rem;cursor:pointer;}
+.btn{background:var(--gd);color:var(--gl2);border:1.5px solid var(--go);border-radius:8px;padding:10px 24px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:background .2s,transform .1s;}
+.btn:hover{background:var(--gm);transform:translateY(-1px);}
+.btn-d{background:transparent;color:var(--rd);border-color:var(--rd);padding:4px 10px;font-size:.75rem;}
+.btn-d:hover{background:rgba(192,57,43,.08);transform:none;}
+.btn-s{background:transparent;color:var(--txt);border-color:var(--gb);}
+.btn-s:hover{background:rgba(90,158,90,.08);transform:none;}
+.btn-xs{padding:5px 12px;font-size:.75rem;}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+.pc{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;}
+.pc .pname{font-weight:600;margin-bottom:3px;}
+.pc .phcp{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--mt);}
+.pc .db{position:absolute;top:9px;right:9px;background:none;border:none;cursor:pointer;color:var(--mt);font-size:.95rem;}
+.pc .db:hover{color:var(--rd);}
+.re{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.reh{background:var(--gm);color:white;padding:11px 16px;display:flex;justify-content:space-between;align-items:center;}
+.rd2{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--gl2);}
+.rs{display:none;padding:14px 16px;}.rs.open{display:block;}
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.md{background:var(--card);border-radius:14px;padding:26px;max-width:580px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--bd);}
+.md h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;color:var(--txt);}
+.esg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:12px 0;}
+.esr{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:7px;padding:7px 10px;}
+.esr label{flex:1;font-size:.83rem;}
+.esr input[type=number]{width:60px;border:1px solid var(--bd);border-radius:5px;padding:3px 6px;font-family:'DM Mono',monospace;text-align:center;font-size:.88rem;outline:none;background:var(--card);color:var(--txt);}
+.esr input[type=checkbox]{accent-color:var(--gb);width:15px;height:15px;cursor:pointer;}
+.ma{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+.al{padding:9px 14px;border-radius:7px;margin-bottom:14px;font-size:.83rem;}
+.al-ok{background:rgba(90,158,90,.15);border:1px solid var(--gb);color:var(--txt);}
+.al-er{background:rgba(192,57,43,.1);border:1px solid var(--rd);color:var(--rd);}
+.stit{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--txt);margin-bottom:18px;padding-bottom:9px;border-bottom:2px solid var(--bd);}
+.hcp-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bd);}
+.hcp-row:last-child{border-bottom:none;}
+.hcp-row:hover{background:rgba(90,158,90,.04);}
+.hcp-row .hname{font-weight:500;font-size:.88rem;}
+.hcp-row .hold{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--mt);margin-top:2px;}
+.hcp-row input{width:72px;border:1.5px solid var(--bd);border-radius:6px;padding:5px 8px;font-family:'DM Mono',monospace;font-size:.92rem;text-align:center;outline:none;background:var(--card);color:var(--txt);}
+.hcp-row input:focus{border-color:var(--gb);}
+.hcp-chg{border-color:var(--go)!important;background:rgba(201,168,76,.1)!important;}
+.loading{text-align:center;padding:40px;color:var(--mt);font-family:'DM Mono',monospace;font-size:.85rem;}
+/* STATS */
+.chart-wrap{padding:20px;background:var(--card);}
+.chart-wrap canvas{max-height:300px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.stat-sel{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.stat-sel label{font-size:.75rem;color:var(--mt);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.stat-sel select{background:var(--card);border:1.5px solid var(--bd);border-radius:7px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--txt);outline:none;cursor:pointer;}
+/* ÆRESTAVLE */
+.honors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
+.honor-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;text-align:center;position:relative;overflow:hidden;}
+.honor-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.honor-card.gold::before{background:linear-gradient(90deg,var(--go),var(--gl2));}
+.honor-card.silver::before{background:linear-gradient(90deg,#b0b8b0,#d0d8d0);}
+.honor-card.bronze::before{background:linear-gradient(90deg,#a07040,#c09060);}
+.honor-card.green::before{background:linear-gradient(90deg,var(--gb),var(--gl));}
+.honor-icon{font-size:2rem;margin-bottom:8px;}
+.honor-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--mt);font-family:'DM Mono',monospace;margin-bottom:6px;}
+.honor-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.honor-val{font-family:'DM Mono',monospace;font-size:.85rem;color:var(--go);}
+/* HEAD TO HEAD */
+.hth-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:22px;}
+.hth-player{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;text-align:center;}
+.hth-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--txt);margin-bottom:8px;}
+.hth-stat{display:flex;justify-content:space-between;font-size:.8rem;padding:4px 0;border-bottom:1px solid var(--bd);}
+.hth-stat:last-child{border-bottom:none;}
+.hth-stat .lbl{color:var(--mt);font-family:'DM Mono',monospace;font-size:.72rem;}
+.hth-stat .win{color:var(--gb);font-weight:700;}
+.hth-vs{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--go);font-weight:700;text-align:center;}
+.bane-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--bd);font-size:.85rem;}
+.bane-row:last-child{border-bottom:none;}
+
+.strtab.active{background:var(--gd)!important;color:var(--gl2)!important;border-color:var(--go)!important;}
+.st-round-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.st-player-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative;}
+.st-player-card .spname{font-weight:600;font-size:.9rem;margin-bottom:8px;}
+.st-score-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bd);font-size:.82rem;}
+.st-score-row:last-child{border-bottom:none;}
+.st-score-row .slbl{color:var(--mt);font-family:&apos;DM Mono&apos;,monospace;font-size:.7rem;}
+.st-score-row input{width:56px;border:1.5px solid var(--bd);border-radius:5px;padding:3px 6px;font-family:&apos;DM Mono&apos;,monospace;text-align:center;font-size:.9rem;background:var(--card);color:var(--txt);outline:none;}
+.st-score-row input:focus{border-color:var(--go);}
+.st-total{font-family:&apos;Playfair Display&apos;,serif;font-size:1.4rem;font-weight:700;color:var(--go);text-align:center;margin-top:8px;}
+.st-saved{position:absolute;top:8px;right:8px;font-size:.65rem;color:var(--gb);font-family:&apos;DM Mono&apos;,monospace;}
+.finale-group{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px;margin-bottom:10px;}
+.finale-group-title{font-family:&apos;DM Mono&apos;,monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--mt);margin-bottom:8px;}
+.finale-group.gold{border-color:var(--go);}
+.finale-group.gold .finale-group-title{color:var(--go);}
+.finale-player{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:.85rem;}
+.finale-player:last-child{border-bottom:none;}
+@media(max-width:900px){
+  main{padding:14px;}.logo-header{padding:14px;}.logo-badge{width:56px;height:56px;}.club-name{font-size:1.2rem;}
+  nav{padding:0 8px;}.srow,.sgrid,.pgrid{grid-template-columns:repeat(2,1fr);}
+  .fg{grid-template-columns:1fr;}.esg{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr;}.honors-grid{grid-template-columns:repeat(2,1fr);}
+  .hth-grid{grid-template-columns:1fr;}.hth-vs{display:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="logo-header">
+  <div class="logo-inner">
+    <div class="logo-left">
+      <svg class="logo-badge" viewBox="0 0 82 82" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="41" cy="41" r="39" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+        <circle cx="41" cy="41" r="35" fill="#1a2e1a"/>
+        <circle cx="41" cy="41" r="32" fill="none" stroke="#c9a84c" stroke-width="0.7" stroke-dasharray="3,2.5"/>
+        <ellipse cx="41" cy="59" rx="17" ry="5.5" fill="#2d4a2d"/>
+        <ellipse cx="41" cy="57" rx="14" ry="4" fill="#3d6b3d"/>
+        <line x1="41" y1="57" x2="41" y2="27" stroke="#e8c96a" stroke-width="1.5"/>
+        <polygon points="41,27 57,33 41,39" fill="#c9a84c"/>
+        <circle cx="41" cy="58" r="4.2" fill="white"/>
+        <circle cx="39.5" cy="56.5" r=".55" fill="#ccc"/>
+        <circle cx="42" cy="57" r=".55" fill="#ccc"/>
+        <circle cx="40" cy="59" r=".55" fill="#ccc"/>
+        <text x="19" y="27" font-size="5.5" fill="#c9a84c" font-family="serif">&#9733;</text>
+        <text x="56" y="27" font-size="5.5" fill="#c9a84c" font-family="serif">&#9733;</text>
+        <text x="41" y="72" font-size="6.5" fill="#c9a84c" font-family="monospace" text-anchor="middle" letter-spacing="1">EST. 1994</text>
+      </svg>
+      <div>
+        <div class="club-name">De<span>Morgenfriske</span> EGK</div>
+        <div class="club-est">EST. 1994</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="sbadge">Sæson 2026</div>
+        <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙 Mørk</button>
+      </div>
+      <div class="sync-row">
+        <span class="sync-dot" id="syncDot"></span>
+        <span class="sync-txt" id="syncTxt">Forbinder...</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('rangliste',this)">🏆 Rangliste</button>
+  <button onclick="showTab('stats',this)">📈 Stats</button>
+  <button onclick="showTab('arestavle',this)">🎖️ Ærestavle</button>
+  <button onclick="showTab('hth',this)">⚔️ Head-to-Head</button>
+  <button onclick="showTab('indtast',this)">✏️ Indtast Runde</button>
+  <button onclick="showTab('spillere',this)">👤 Spillere</button>
+  <button onclick="showTab('historik',this)">📋 Historik</button>
+  <button onclick="showTab('sommertour',this)" style="color:#e8c96a;border-bottom-color:transparent;" id="navST">☀️ SommerTour</button>
+</nav>
+
+<main>
+
+<!-- RANGLISTE -->
+<div class="sec active" id="tab-rangliste">
+  <div class="srow" id="srow"></div>
+  <div class="card">
+    <div class="ch">🏆 Sæsonrangliste — Top 10 scores tæller (fra og med 11 runder)</div>
+    <table>
+      <thead><tr><th>#</th><th>Spiller</th><th class="r">Total (top 10)</th><th class="r">Gns.</th><th class="r">Bedste</th><th class="r">Form</th><th class="r">Runder</th><th class="r">Status</th></tr></thead>
+      <tbody id="rtbody"><tr><td colspan="8" class="loading">Henter data fra skyen...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="sec" id="tab-stats">
+  <h2 class="stit">📈 Statistik</h2>
+  <div class="stats-grid">
+    <div class="card">
+      <div class="ch">📉 Scoreudvikling — enkelt spiller</div>
+      <div class="chart-wrap">
+        <div class="stat-sel">
+          <label>Spiller</label>
+          <select id="statPlayer" onchange="renderLineChart()"></select>
+        </div>
+        <canvas id="lineChart"></canvas>
+        <p id="lineMsg" style="text-align:center;color:var(--mt);font-size:.8rem;padding:20px;"></p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch">📊 Gennemsnit — alle spillere</div>
+      <div class="chart-wrap">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">⛳ Bedste baner (gennemsnit per bane)</div>
+    <div id="baneList"></div>
+  </div>
+</div>
+
+<!-- ÆRESTAVLE -->
+<div class="sec" id="tab-arestavle">
+  <h2 class="stit">🎖️ Ærestavle & Rekorder</h2>
+  <div class="honors-grid" id="honorsGrid"></div>
+  <div class="card">
+    <div class="ch">📜 Sæsonrekorder</div>
+    <div id="rekordList"></div>
+  </div>
+</div>
+
+<!-- HEAD TO HEAD -->
+<div class="sec" id="tab-hth">
+  <h2 class="stit">⚔️ Head-to-Head</h2>
+  <div class="stat-sel" style="margin-bottom:18px;">
+    <label>Spiller 1</label>
+    <select id="hthP1" onchange="renderHth()"></select>
+    <span style="color:var(--go);font-weight:700;font-size:1.1rem;">VS</span>
+    <label>Spiller 2</label>
+    <select id="hthP2" onchange="renderHth()"></select>
+  </div>
+  <div id="hthContent"></div>
+</div>
+
+<!-- INDTAST RUNDE -->
+<div class="sec" id="tab-indtast">
+  <h2 class="stit">✏️ Indtast ny runde</h2>
+  <div id="ial"></div>
+  <div class="card" style="padding:22px;">
+    <div class="fg">
+      <div class="fg1"><label>Dato for runden</label><input type="date" id="rdate"/></div>
+      <div class="fg1"><label>Bane (valgfri)</label><input type="text" id="rnote" placeholder="fx. Himmelbjerg GK"/></div>
+    </div>
+    <p style="font-size:.74rem;color:var(--mt);margin-bottom:12px;font-family:'DM Mono',monospace;">SÆT KRYDS OG ANGIV STABLEFORD POINT FOR DELTAGERNE</p>
+    <div class="sgrid" id="sgrid"></div>
+    <button class="btn" onclick="gemRunde()">💾 Gem runde</button>
+  </div>
+</div>
+
+<!-- SPILLERE -->
+<div class="sec" id="tab-spillere">
+  <h2 class="stit">👤 Spillere</h2>
+  <div id="sal"></div>
+  <div class="card" style="padding:22px;margin-bottom:22px;">
+    <div class="fg">
+      <div class="fg1"><label>Spillernavn</label><input type="text" id="nname" placeholder="Fornavn Efternavn"/></div>
+      <div class="fg1"><label>Handicap indeks (0.0–54.0)</label><input type="number" id="nhcp" placeholder="18.5" min="0" max="54" step="0.1"/></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn" onclick="addPlayer()">➕ Tilføj spiller</button>
+      <button class="btn btn-s" onclick="openHcpModal()">🔄 Opdater alle handicaps</button>
+        <button class="btn btn-s" onclick="genindlaesSpillere()" style="border-color:var(--rd);color:var(--rd);" title="Brug kun hvis spillerlisten er tom eller forkert">♻️ Genindlæs spillere</button>
+    </div>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</div>
+
+
+<!-- SOMMERTOUR -->
+<div class="sec" id="tab-sommertour">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+    <h2 class="stit" style="margin-bottom:0;border:none;">☀️ SommerTour</h2>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <select id="stYear" onchange="loadST()" style="background:var(--card);border:1.5px solid var(--go);border-radius:8px;padding:6px 14px;font-family:&apos;DM Mono&apos;,monospace;font-size:.85rem;color:var(--txt);cursor:pointer;"></select>
+      <button class="btn btn-s btn-xs" onclick="newSTYear()">+ Nyt år</button>
+      <button class="btn btn-xs" onclick="openSTAdmin()">⚙️ Administrer</button>
+    </div>
+  </div>
+  <div id="stAlert"></div>
+  <div class="srow" id="stKpi" style="margin-bottom:18px;"></div>
+  <div class="card" style="margin-bottom:18px;">
+    <div class="ch" id="stLbTitle">🏆 Samlet stilling</div>
+    <table>
+      <thead><tr><th>#</th><th>Spiller</th><th class="r">Fredag</th><th class="r">Lørdag</th><th class="r">Søndag</th><th class="r">Total</th></tr></thead>
+      <tbody id="stLbBody"><tr><td colspan="6" class="loading">Vælg eller opret et SommerTour-år...</td></tr></tbody>
+    </table>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <button class="btn btn-s btn-xs strtab active" id="strtab0" onclick="showSTRound(0,this)">📅 Fredag</button>
+    <button class="btn btn-s btn-xs strtab" id="strtab1" onclick="showSTRound(1,this)">📅 Lørdag</button>
+    <button class="btn btn-s btn-xs strtab" id="strtab2" onclick="showSTRound(2,this)">🏆 Søndag (Finale)</button>
+  </div>
+  <div id="stRoundDetail"></div>
+  <div id="stFinaleStart" style="display:none;" class="card">
+    <div class="ch">🚀 Startliste — Finalen Søndag</div>
+    <div id="stFinaleBody" style="padding:14px;"></div>
+  </div>
+</div>
+
+<!-- HISTORIK -->
+<div class="sec" id="tab-historik">
+  <h2 class="stit">📋 Rundehistorik</h2>
+  <div id="hal"></div>
+  <div id="hlist"></div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+<div class="mo" id="emod">
+  <div class="md">
+    <h3>✏️ Rediger runde</h3>
+    <div class="fg">
+      <div class="fg1"><label>Dato</label><input type="date" id="edate"/></div>
+      <div class="fg1"><label>Bane</label><input type="text" id="enote" placeholder="fx. Himmelbjerg GK"/></div>
+    </div>
+    <div class="esg" id="esg"></div>
+    <div id="eal"></div>
+    <div class="ma">
+      <button class="btn" onclick="saveEdit()">💾 Gem ændringer</button>
+      <button class="btn btn-s" onclick="closeModal()">Annuller</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="hcpmod">
+  <div class="md" style="max-width:460px;">
+    <h3>🔄 Opdater alle handicaps</h3>
+    <p style="font-size:.83rem;color:var(--mt);margin-bottom:14px;">Ændrede felter markeres med guldkant.</p>
+    <div id="hcpList" style="border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:14px;max-height:360px;overflow-y:auto;"></div>
+    <div id="hcpal"></div>
+    <div class="ma">
+      <button class="btn" onclick="saveAllHcp()">💾 Gem alle ændringer</button>
+      <button class="btn btn-s" onclick="closeHcpModal()">Annuller</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjkNIBGrQyyR05fjqWPgsMQKvAcpdHpU8",
+  authDomain: "demorgenfriske.firebaseapp.com",
+  projectId: "demorgenfriske",
+  storageBucket: "demorgenfriske.firebasestorage.app",
+  messagingSenderId: "253406955474",
+  appId: "1:253406955474:web:b36a936d1cee44cd35ea0b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+var players = [], rounds = [], eid = null;
+var lineChartInst = null, barChartInst = null;
+
+// THEME
+window.toggleTheme = function() {
+  var html = document.documentElement;
+  var isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '🌙 Mørk' : '☀️ Lys';
+  setTimeout(function(){ renderBarChart(); renderLineChart(); }, 350);
+};
+
+// SYNC STATUS
+function setSyncStatus(ok, txt) {
+  document.getElementById('syncDot').className = 'sync-dot ' + (ok ? 'ok' : 'err');
+  document.getElementById('syncTxt').textContent = txt;
+}
+
+// REALTIME
+onSnapshot(collection(db, 'Players'), function(snap) {
+  players = [];
+  snap.forEach(function(d) { players.push(Object.assign({id:d.id}, d.data())); });
+  players.sort(function(a,b){ return a.name.localeCompare(b.name,'da'); });
+  setSyncStatus(true, 'Live \u25CF synkroniseret');
+  renderAll();
+}, function(){ setSyncStatus(false, 'Forbindelsesfejl'); });
+
+onSnapshot(query(collection(db,'rounds'), orderBy('date')), function(snap) {
+  rounds = [];
+  snap.forEach(function(d){ rounds.push(Object.assign({id:d.id}, d.data())); });
+  renderAll();
+}, function(){ setSyncStatus(false, 'Forbindelsesfejl'); });
+
+// PUSH NOTIFIKATION
+async function requestNotifPerm() {
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default') await Notification.requestPermission();
+}
+requestNotifPerm();
+
+function sendNotif(title, body) {
+  if(Notification.permission === 'granted') {
+    new Notification(title, {body: body, icon: ''});
+  }
+}
+
+// INIT SPILLERE
+async function initPlayers() {
+  // Kun køres manuelt via knappen - ikke automatisk
+}
+
+function renderAll() { renderR(); renderP(); renderSG(); updateSelects(); }
+
+// TAB
+window.showTab = function(t, b) {
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('nav button').forEach(function(x){ x.classList.remove('active'); });
+  document.getElementById('tab-'+t).classList.add('active');
+  if(b) b.classList.add('active');
+  if(t==='stats'){ renderLineChart(); renderBarChart(); renderBaner(); }
+  if(t==='arestavle') renderArestavle();
+  if(t==='hth') renderHth();
+  if(t==='historik') renderH();
+};
+
+// HELPERS
+function prc(pid){ return rounds.filter(function(r){ return r.scores&&r.scores[pid]!==undefined; }).length; }
+function pscoresList(pid){
+  return rounds.filter(function(r){ return r.scores&&r.scores[pid]!==undefined; })
+    .map(function(r){ return {date:r.date,score:r.scores[pid],note:r.note||''}; })
+    .sort(function(a,b){ return a.date.localeCompare(b.date); });
+}
+function calc(pid){
+  var all=pscoresList(pid).slice().sort(function(a,b){return b.score-a.score;});
+  var n=all.length,q=n>=11,ct=q?all.slice(0,10):all;
+  var tot=ct.reduce(function(s,x){return s+x.score;},0);
+  return {n:n,q:q,tot:tot,avg:ct.length?(tot/ct.length).toFixed(1):'–',best:all.length?all[0].score:'–'};
+}
+function formInd(pid){
+  var sc=pscoresList(pid);
+  if(sc.length<4) return '<span class="form-eq">–</span>';
+  var last3=sc.slice(-3).reduce(function(s,x){return s+x.score;},0)/3;
+  var prev3=sc.slice(-6,-3).reduce(function(s,x){return s+x.score;},0)/3;
+  if(sc.length<6) return '<span class="form-eq">–</span>';
+  if(last3>prev3+1) return '<span class="form-up">▲</span>';
+  if(last3<prev3-1) return '<span class="form-dn">▼</span>';
+  return '<span class="form-eq">→</span>';
+}
+function fd(d){ if(!d)return''; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function e(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showAl(el,msg,type){ if(!el)return; el.innerHTML='<div class="al al-'+(type==='ok'?'ok':'er')+'">'+msg+'</div>'; setTimeout(function(){el.innerHTML='';},4000); }
+function getCSS(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+// RANGLISTE
+function renderR(){
+  var tr=rounds.length, qc=players.filter(function(p){return prc(p.id)>=11;}).length;
+  var last=rounds.length?rounds[rounds.length-1]:null;
+  document.getElementById('srow').innerHTML=
+    '<div class="sc"><div class="lbl">Spillere</div><div class="val">'+players.length+'</div><div class="sub">af 16 max</div></div>'+
+    '<div class="sc"><div class="lbl">Runder i alt</div><div class="val">'+tr+'</div><div class="sub">denne sæson</div></div>'+
+    '<div class="sc"><div class="lbl">Kvalificerede</div><div class="val">'+qc+'</div><div class="sub">11+ runder spillet</div></div>'+
+    '<div class="sc"><div class="lbl">Seneste runde</div><div class="val" style="font-size:1.05rem;">'+(last?fd(last.date):'–')+'</div><div class="sub">'+(last&&last.note?last.note:'')+'</div></div>';
+  var ranked=players.map(function(p){ var c=calc(p.id); return {p:p,n:c.n,q:c.q,tot:c.tot,avg:c.avg,best:c.best}; });
+  ranked.sort(function(a,b){ if(a.q&&!b.q)return -1; if(!a.q&&b.q)return 1; return b.tot-a.tot||parseFloat(b.avg)-parseFloat(a.avg); });
+  var mx=Math.max.apply(null,players.map(function(p){return prc(p.id);}).concat([1]));
+  var tb=document.getElementById('rtbody');
+  if(!ranked.length){ tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--mt);padding:28px;">Henter spillere...</td></tr>'; return; }
+  tb.innerHTML=ranked.map(function(row,i){
+    var rk=i+1,bc=rk<=3?'r'+rk:'rx',bw=Math.round((row.n/mx)*100);
+    return '<tr><td><span class="rb '+bc+'">'+rk+'</span></td>'+
+      '<td><span class="pn">'+e(row.p.name)+'</span></td>'+
+      '<td class="r"><span class="sb '+(row.q?'sg':'')+'">'+( row.q?row.tot:'('+row.tot+')' )+'</span></td>'+
+      '<td class="r"><span class="sb">'+row.avg+'</span></td>'+
+      '<td class="r"><span class="sb">'+row.best+'</span></td>'+
+      '<td class="r">'+formInd(row.p.id)+'</td>'+
+      '<td class="r"><div class="bar"><div class="barbg"><div class="barfill" style="width:'+bw+'%"></div></div><span style="font-size:.8rem;">'+row.n+'</span></div></td>'+
+      '<td class="r">'+(row.q?'<span class="ok">✓ TÆLLER</span>':'<span class="nq">'+row.n+'/11</span>')+'</td></tr>';
+  }).join('');
+}
+
+// SELECT OPDATERING
+function updateSelects(){
+  var sels=['statPlayer','hthP1','hthP2'];
+  sels.forEach(function(sid){
+    var sel=document.getElementById(sid);
+    if(!sel)return;
+    var cur=sel.value;
+    sel.innerHTML=players.map(function(p){return '<option value="'+p.id+'">'+e(p.name)+'</option>';}).join('');
+    if(cur) sel.value=cur;
+    if(sid==='hthP2'&&players.length>1) sel.selectedIndex=1;
+  });
+}
+
+// LINE CHART
+window.renderLineChart = function(){
+  var sel=document.getElementById('statPlayer');
+  if(!sel||!sel.value) return;
+  var pid=sel.value;
+  var sc=pscoresList(pid);
+  var msg=document.getElementById('lineMsg');
+  var canvas=document.getElementById('lineChart');
+  if(sc.length<2){ msg.textContent='Mindst 2 runder kræves for at vise graf.'; canvas.style.display='none'; return; }
+  canvas.style.display='block'; msg.textContent='';
+  var labels=sc.map(function(x){return fd(x.date);});
+  var data=sc.map(function(x){return x.score;});
+  var avg=data.reduce(function(a,b){return a+b;},0)/data.length;
+  var avgLine=data.map(function(){return parseFloat(avg.toFixed(1));});
+  if(lineChartInst) lineChartInst.destroy();
+  lineChartInst=new Chart(canvas,{
+    type:'line',
+    data:{labels:labels,datasets:[
+      {label:'Score',data:data,borderColor:'#c9a84c',backgroundColor:'rgba(201,168,76,.15)',tension:.3,pointRadius:5,pointHoverRadius:7,fill:true},
+      {label:'Gennemsnit',data:avgLine,borderColor:'#5a9e5a',borderDash:[6,3],pointRadius:0,tension:0}
+    ]},
+    options:{responsive:true,plugins:{legend:{labels:{color:getCSS('--txt')||'#333'}}},scales:{x:{ticks:{color:getCSS('--mt')||'#666',maxRotation:45}},y:{ticks:{color:getCSS('--mt')||'#666'}}}}
+  });
+};
+
+// BAR CHART
+function renderBarChart(){
+  var canvas=document.getElementById('barChart');
+  var data=players.map(function(p){
+    var sc=pscoresList(p.id);
+    if(!sc.length) return {name:p.name,avg:0};
+    var avg=sc.reduce(function(s,x){return s+x.score;},0)/sc.length;
+    return {name:p.name,avg:parseFloat(avg.toFixed(1))};
+  }).filter(function(x){return x.avg>0;}).sort(function(a,b){return b.avg-a.avg;});
+  if(!data.length) return;
+  if(barChartInst) barChartInst.destroy();
+  barChartInst=new Chart(canvas,{
+    type:'bar',
+    data:{
+      labels:data.map(function(x){return x.name.split(' ')[0];}),
+      datasets:[{label:'Gns. score',data:data.map(function(x){return x.avg;}),backgroundColor:'rgba(201,168,76,.7)',borderColor:'#c9a84c',borderWidth:2,borderRadius:4}]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{color:getCSS('--txt')||'#333'}}},scales:{x:{ticks:{color:getCSS('--mt')||'#666'}},y:{ticks:{color:getCSS('--mt')||'#666'},beginAtZero:false}}}
+  });
+}
+
+// BANER
+function renderBaner(){
+  var baner={};
+  rounds.forEach(function(r){
+    if(!r.note||!r.note.trim()) return;
+    var b=r.note.trim();
+    if(!baner[b]) baner[b]={scores:[],count:0};
+    Object.values(r.scores||{}).forEach(function(sc){ baner[b].scores.push(sc); baner[b].count++; });
+  });
+  var list=Object.keys(baner).map(function(b){
+    var avg=baner[b].scores.reduce(function(a,c){return a+c;},0)/baner[b].scores.length;
+    return {name:b,avg:parseFloat(avg.toFixed(1)),count:baner[b].count};
+  }).sort(function(a,b){return b.avg-a.avg;});
+  var el=document.getElementById('baneList');
+  if(!list.length){ el.innerHTML='<div style="padding:16px;color:var(--mt);font-size:.85rem;">Ingen baner registreret endnu — tilføj banenavn når du indtaster runder.</div>'; return; }
+  el.innerHTML=list.map(function(b){
+    return '<div class="bane-row"><span style="font-weight:500;">'+e(b.name)+'</span><span style="font-family:\'DM Mono\',monospace;font-size:.8rem;color:var(--mt);">'+b.count+' runder</span><span style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--go);">Gns. '+b.avg+'</span></div>';
+  }).join('');
+}
+
+// ÆRESTAVLE
+function renderArestavle(){
+  var honors=[];
+  if(!players.length||!rounds.length){ document.getElementById('honorsGrid').innerHTML='<p style="color:var(--mt)">Ikke nok data endnu.</p>'; return; }
+  // Bedste enkeltround
+  var bestSingle={name:'',score:0,date:''};
+  rounds.forEach(function(r){ Object.keys(r.scores||{}).forEach(function(pid){ if(r.scores[pid]>bestSingle.score){ var p=players.find(function(x){return x.id===pid;}); if(p) bestSingle={name:p.name,score:r.scores[pid],date:r.date}; } }); });
+  if(bestSingle.name) honors.push({icon:'⭐',title:'Bedste enkeltround',name:bestSingle.name,val:bestSingle.score+' point ('+fd(bestSingle.date)+')',cls:'gold'});
+  // Højeste gennemsnit
+  var avgs=players.map(function(p){ var sc=pscoresList(p.id); if(!sc.length)return null; var avg=sc.reduce(function(s,x){return s+x.score;},0)/sc.length; return {name:p.name,avg:parseFloat(avg.toFixed(1))}; }).filter(Boolean).sort(function(a,b){return b.avg-a.avg;});
+  if(avgs.length) honors.push({icon:'📊',title:'Højeste gennemsnit',name:avgs[0].name,val:avgs[0].avg+' point pr. runde',cls:'silver'});
+  // Mest konsistente (lavest standardafvigelse)
+  var consData=players.map(function(p){ var sc=pscoresList(p.id); if(sc.length<4)return null; var avg=sc.reduce(function(s,x){return s+x.score;},0)/sc.length; var sd=Math.sqrt(sc.reduce(function(s,x){return s+Math.pow(x.score-avg,2);},0)/sc.length); return {name:p.name,sd:parseFloat(sd.toFixed(2)),n:sc.length}; }).filter(Boolean).sort(function(a,b){return a.sd-b.sd;});
+  if(consData.length) honors.push({icon:'🎯',title:'Mest konsistente',name:consData[0].name,val:'±'+consData[0].sd+' point variation',cls:'bronze'});
+  // Flest runder
+  var mostRounds=players.map(function(p){return {name:p.name,n:prc(p.id)};}).sort(function(a,b){return b.n-a.n;});
+  if(mostRounds.length&&mostRounds[0].n>0) honors.push({icon:'🏌️',title:'Mest aktive spiller',name:mostRounds[0].name,val:mostRounds[0].n+' runder spillet',cls:'green'});
+  // Bedste form (bedste snit i seneste 3 runder)
+  var formData=players.map(function(p){ var sc=pscoresList(p.id); if(sc.length<3)return null; var last3=sc.slice(-3); var avg=last3.reduce(function(s,x){return s+x.score;},0)/3; return {name:p.name,avg:parseFloat(avg.toFixed(1))}; }).filter(Boolean).sort(function(a,b){return b.avg-a.avg;});
+  if(formData.length) honors.push({icon:'🔥',title:'Bedste form (seneste 3)',name:formData[0].name,val:formData[0].avg+' point i snit',cls:'gold'});
+  // Bedste runde i dag (seneste runde vinder)
+  if(rounds.length){
+    var lr=rounds[rounds.length-1]; var lrScores=Object.keys(lr.scores||{}).map(function(pid){ var p=players.find(function(x){return x.id===pid;}); return {name:p?p.name:'?',sc:lr.scores[pid]}; }).sort(function(a,b){return b.sc-a.sc;});
+    if(lrScores.length) honors.push({icon:'🥇',title:'Vinder af seneste runde',name:lrScores[0].name,val:lrScores[0].sc+' point ('+fd(lr.date)+')',cls:'gold'});
+  }
+  document.getElementById('honorsGrid').innerHTML=honors.map(function(h){
+    return '<div class="honor-card '+h.cls+'"><div class="honor-icon">'+h.icon+'</div><div class="honor-title">'+h.title+'</div><div class="honor-name">'+e(h.name)+'</div><div class="honor-val">'+h.val+'</div></div>';
+  }).join('');
+  // REKORDER
+  var recs=[];
+  if(bestSingle.name) recs.push('🏆 Højeste enkeltround nogensinde: <strong>'+bestSingle.score+' point</strong> af '+e(bestSingle.name)+' ('+fd(bestSingle.date)+')');
+  if(avgs.length) recs.push('📈 Højeste sæsongennemsnit: <strong>'+avgs[0].avg+'</strong> af '+e(avgs[0].name));
+  if(rounds.length) recs.push('📅 Antal runder spillet denne sæson: <strong>'+rounds.length+'</strong>');
+  var totScores=rounds.map(function(r){return Object.values(r.scores||{}).reduce(function(a,b){return a+b;},0);});
+  if(totScores.length) recs.push('🎯 Højeste hold-total i én runde: <strong>'+Math.max.apply(null,totScores)+' point</strong>');
+  document.getElementById('rekordList').innerHTML='<div style="padding:16px;">'+recs.map(function(r){return '<div style="padding:8px 0;border-bottom:1px solid var(--bd);font-size:.88rem;">'+r+'</div>';}).join('')+'</div>';
+}
+
+// HEAD TO HEAD
+window.renderHth = function(){
+  var p1id=document.getElementById('hthP1').value;
+  var p2id=document.getElementById('hthP2').value;
+  var el=document.getElementById('hthContent');
+  if(!p1id||!p2id||p1id===p2id){ el.innerHTML='<p style="color:var(--mt)">Vælg to forskellige spillere.</p>'; return; }
+  var p1=players.find(function(p){return p.id===p1id;}), p2=players.find(function(p){return p.id===p2id;});
+  if(!p1||!p2) return;
+  // Find runder begge deltog
+  var shared=rounds.filter(function(r){ return r.scores&&r.scores[p1id]!==undefined&&r.scores[p2id]!==undefined; });
+  var p1wins=shared.filter(function(r){return r.scores[p1id]>r.scores[p2id];}).length;
+  var p2wins=shared.filter(function(r){return r.scores[p1id]<r.scores[p2id];}).length;
+  var draws=shared.length-p1wins-p2wins;
+  var c1=calc(p1id), c2=calc(p2id);
+  function statRow(lbl,v1,v2,higherIsBetter){
+    var n1=parseFloat(v1),n2=parseFloat(v2);
+    var w1=higherIsBetter?n1>n2:n1<n2, w2=higherIsBetter?n2>n1:n2<n1;
+    return '<div class="hth-stat"><span class="lbl">'+lbl+'</span><span class="'+(w1?'win':'')+'" style="font-family:\'DM Mono\',monospace;">'+v1+'</span><span class="'+(w2?'win':'')+'" style="font-family:\'DM Mono\',monospace;">'+v2+'</span></div>';
+  }
+  el.innerHTML='<div class="hth-grid">'+
+    '<div class="hth-player"><div class="hth-name">'+e(p1.name)+'</div>'+statRow('Gns.',c1.avg,c2.avg,true)+statRow('Bedste',c1.best,c2.best,true)+statRow('Runder',c1.n,c2.n,true)+statRow('Direkte sejre',p1wins,p2wins,true)+'</div>'+
+    '<div class="hth-vs">VS</div>'+
+    '<div class="hth-player"><div class="hth-name">'+e(p2.name)+'</div>'+statRow('Gns.',c2.avg,c1.avg,true)+statRow('Bedste',c2.best,c1.best,true)+statRow('Runder',c2.n,c1.n,true)+statRow('Direkte sejre',p2wins,p1wins,true)+'</div>'+
+    '</div>'+
+    '<div class="card"><div class="ch">⚔️ Direkte opgør ('+shared.length+' fælles runder)</div>'+
+    '<div style="padding:14px;display:flex;gap:24px;justify-content:center;font-family:\'DM Mono\',monospace;">'+
+    '<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;color:var(--go);">'+p1wins+'</div><div style="font-size:.75rem;color:var(--mt);">'+e(p1.name.split(' ')[0])+'</div></div>'+
+    '<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;color:var(--mt);">'+draws+'</div><div style="font-size:.75rem;color:var(--mt);">Uafgjort</div></div>'+
+    '<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;color:var(--go);">'+p2wins+'</div><div style="font-size:.75rem;color:var(--mt);">'+e(p2.name.split(' ')[0])+'</div></div>'+
+    '</div></div>';
+};
+
+// SPILLERE
+window.addPlayer = async function(){
+  var nm=document.getElementById('nname').value.trim(), hc=parseFloat(document.getElementById('nhcp').value), al=document.getElementById('sal');
+  if(!nm) return showAl(al,'Angiv et navn.','er');
+  if(isNaN(hc)||hc<0||hc>54) return showAl(al,'Handicap skal være 0–54.','er');
+  if(players.length>=16) return showAl(al,'Maks. 16 spillere.','er');
+  if(players.find(function(p){return p.name.toLowerCase()===nm.toLowerCase();})) return showAl(al,'Navn findes allerede.','er');
+  await setDoc(doc(collection(db,'Players')),{name:nm,hcp:hc});
+  document.getElementById('nname').value=''; document.getElementById('nhcp').value='';
+  showAl(document.getElementById('sal'),nm+' tilføjet! ✅','ok');
+};
+
+window.delPlayer = async function(id){
+  if(!confirm('Slet spilleren og alle scores?')) return;
+  await deleteDoc(doc(db,'Players',id));
+  showAl(document.getElementById('sal'),'Spiller slettet.','ok');
+};
+
+window.updHcp = async function(id,v){ var val=parseFloat(v); if(!isNaN(val)&&val>=0&&val<=54) await setDoc(doc(db,'Players',id),{hcp:val},{merge:true}); };
+
+function renderP(){
+  var g=document.getElementById('pgrid');
+  if(!players.length){ g.innerHTML='<p style="color:var(--mt)">Ingen spillere endnu.</p>'; return; }
+  g.innerHTML=players.map(function(p){
+    return '<div class="pc"><button class="db" onclick="delPlayer(\''+p.id+'\')">&#10005;</button>'+
+      '<div class="pname">'+e(p.name)+'</div>'+
+      '<div class="phcp">HCP: <input type="number" value="'+p.hcp+'" min="0" max="54" step="0.1" style="width:58px;border:1px solid var(--bd);border-radius:4px;padding:2px 5px;font-family:\'DM Mono\',monospace;font-size:.8rem;background:var(--card);color:var(--txt);" onchange="updHcp(\''+p.id+'\',this.value)"/></div>'+
+      '<div style="font-size:.68rem;color:var(--mt);margin-top:4px;">'+prc(p.id)+' runder</div></div>';
+  }).join('');
+}
+
+// SCORE GRID
+function renderSG(){
+  var g=document.getElementById('sgrid'), di=document.getElementById('rdate');
+  if(!di.value) di.value=new Date().toISOString().split('T')[0];
+  if(!players.length){ g.innerHTML='<p style="color:var(--mt);grid-column:span 4;">Tilføj spillere først.</p>'; return; }
+  g.innerHTML=players.map(function(p){
+    return '<div class="si"><div class="sl">'+e(p.name)+'</div>'+
+      '<input type="number" id="sc_'+p.id+'" min="0" max="72" placeholder="–" disabled/>'+
+      '<label class="ck"><input type="checkbox" id="ck_'+p.id+'" onchange="togSc(\''+p.id+'\')" /> Deltog</label></div>';
+  }).join('');
+}
+
+window.togSc=function(id){ var c=document.getElementById('ck_'+id),i=document.getElementById('sc_'+id); i.disabled=!c.checked; if(c.checked)i.focus(); else i.value=''; };
+
+window.gemRunde=async function(){
+  var al=document.getElementById('ial'), dt=document.getElementById('rdate').value, nt=document.getElementById('rnote').value.trim();
+  if(!dt) return showAl(al,'Vælg en dato.','er');
+  var sc={},cnt=0;
+  for(var i=0;i<players.length;i++){ var p=players[i],c=document.getElementById('ck_'+p.id); if(c&&c.checked){ var v=parseInt(document.getElementById('sc_'+p.id).value); if(isNaN(v)||v<0) return showAl(al,'Angiv score for '+p.name+'.','er'); sc[p.id]=v; cnt++; } }
+  if(cnt<2) return showAl(al,'Minimum 2 spillere skal deltage.','er');
+  await setDoc(doc(collection(db,'rounds')),{date:dt,note:nt,scores:sc});
+  sendNotif('⛳ Ny runde registreret!','Runde d. '+fd(dt)+' med '+cnt+' spillere er gemt.');
+  showAl(al,'✅ Runde d. '+fd(dt)+' gemt med '+cnt+' spillere!','ok');
+  document.getElementById('rnote').value=''; renderSG();
+};
+
+// REDIGER
+window.openEdit=function(rid){ eid=rid; var r=rounds.find(function(x){return x.id===rid;}); if(!r)return; document.getElementById('edate').value=r.date; document.getElementById('enote').value=r.note||''; document.getElementById('eal').innerHTML=''; document.getElementById('esg').innerHTML=players.map(function(p){ var has=r.scores&&r.scores[p.id]!==undefined,sc=has?r.scores[p.id]:''; return '<div class="esr"><input type="checkbox" id="eck_'+p.id+'" '+(has?'checked':'')+' onchange="togESc(\''+p.id+'\')" /><label for="eck_'+p.id+'">'+e(p.name)+'</label><input type="number" id="esc_'+p.id+'" value="'+sc+'" min="0" max="72" placeholder="–" '+(has?'':'disabled')+' style="background:var(--card);color:var(--txt);"/></div>'; }).join(''); document.getElementById('emod').classList.add('open'); };
+window.togESc=function(id){ var c=document.getElementById('eck_'+id),i=document.getElementById('esc_'+id); i.disabled=!c.checked; if(c.checked)i.focus(); else i.value=''; };
+window.saveEdit=async function(){ var al=document.getElementById('eal'),dt=document.getElementById('edate').value,nt=document.getElementById('enote').value.trim(); if(!dt)return showAl(al,'Vælg en dato.','er'); var sc={},cnt=0; for(var i=0;i<players.length;i++){ var p=players[i],c=document.getElementById('eck_'+p.id); if(c&&c.checked){ var v=parseInt(document.getElementById('esc_'+p.id).value); if(isNaN(v)||v<0)return showAl(al,'Angiv score for '+p.name+'.','er'); sc[p.id]=v; cnt++; } } if(cnt<2)return showAl(al,'Minimum 2 spillere.','er'); await setDoc(doc(db,'rounds',eid),{date:dt,note:nt,scores:sc}); closeModal(); renderH(); showAl(document.getElementById('hal'),'✅ Runde opdateret!','ok'); };
+window.closeModal=function(){ document.getElementById('emod').classList.remove('open'); eid=null; };
+document.getElementById('emod').addEventListener('click',function(e){ if(e.target===this)window.closeModal(); });
+
+// HISTORIK
+function renderH(){
+  var el=document.getElementById('hlist');
+  if(!rounds.length){ el.innerHTML='<p style="color:var(--mt)">Ingen runder endnu.</p>'; return; }
+  el.innerHTML=[...rounds].reverse().map(function(r){
+    var pts=r.scores?Object.keys(r.scores).map(function(pid){return {pid:pid,sc:r.scores[pid]};}):[]; pts.sort(function(a,b){return b.sc-a.sc;});
+    var rows=pts.map(function(x){ var p=players.find(function(pl){return pl.id===x.pid;}); return '<tr><td>'+(p?e(p.name):'Ukendt')+'</td><td class="r">'+x.sc+'</td></tr>'; }).join('');
+    return '<div class="re"><div class="reh"><div style="cursor:pointer;flex:1;" onclick="togR(\''+r.id+'\')"><span class="rd2">'+fd(r.date)+'</span>'+(r.note?'<span style="color:rgba(255,255,255,.6);font-size:.78rem;margin-left:10px;">'+e(r.note)+'</span>':'')+'<span style="color:rgba(255,255,255,.4);font-size:.72rem;margin-left:8px;">'+pts.length+' spillere ▾</span></div><div style="display:flex;gap:7px;"><button class="btn btn-s btn-xs" onclick="openEdit(\''+r.id+'\')" style="color:var(--gl2);border-color:var(--go);">✏️ Rediger</button><button class="btn btn-d btn-xs" onclick="delRound(\''+r.id+'\',event)">Slet</button></div></div><div class="rs" id="r_'+r.id+'"><table><thead><tr><th>Spiller</th><th class="r">Point</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+  }).join('');
+}
+window.togR=function(id){ document.getElementById('r_'+id).classList.toggle('open'); };
+window.delRound=async function(id,ev){ ev.stopPropagation(); if(!confirm('Slet denne runde?'))return; await deleteDoc(doc(db,'rounds',id)); renderH(); };
+
+// BULK HCP
+window.openHcpModal=function(){ if(!players.length){alert('Ingen spillere endnu.');return;} document.getElementById('hcpal').innerHTML=''; document.getElementById('hcpList').innerHTML=players.map(function(p){ return '<div class="hcp-row"><div><div class="hname">'+e(p.name)+'</div><div class="hold">Nuværende HCP: '+p.hcp+'</div></div><input type="number" id="hcpi_'+p.id+'" value="'+p.hcp+'" min="0" max="54" step="0.1" oninput="markHcp(this,'+p.hcp+')"/></div>'; }).join(''); document.getElementById('hcpmod').classList.add('open'); };
+window.markHcp=function(inp,orig){ parseFloat(inp.value)!==orig?inp.classList.add('hcp-chg'):inp.classList.remove('hcp-chg'); };
+window.saveAllHcp=async function(){ var changed=0; for(var i=0;i<players.length;i++){ var p=players[i],inp=document.getElementById('hcpi_'+p.id); if(!inp)continue; var v=parseFloat(inp.value); if(!isNaN(v)&&v>=0&&v<=54&&v!==p.hcp){ await setDoc(doc(db,'Players',p.id),{hcp:v},{merge:true}); changed++; } } if(changed>0){ showAl(document.getElementById('hcpal'),changed+' handicap(s) opdateret! ✅','ok'); setTimeout(function(){closeHcpModal();},1400); } else showAl(document.getElementById('hcpal'),'Ingen ændringer at gemme.','er'); };
+window.closeHcpModal=function(){ document.getElementById('hcpmod').classList.remove('open'); };
+document.getElementById('hcpmod').addEventListener('click',function(e){ if(e.target===this)window.closeHcpModal(); });
+
+
+// ============================================================
+// SOMMERTOUR
+// ============================================================
+var stData = null; // current tour data
+var stYear = null;
+var stRoundIdx = 0;
+var ST_ROUNDS = ['Fredag','Lordag','Sondag'];
+var ST_LABELS = ['Fredag','Lørdag','Søndag (Finale)'];
+
+// Init SommerTour tab
+window.showTab_ST = function(){
+  populateSTYears();
+  var sel = document.getElementById('stYear');
+  if(sel.options.length > 0){ sel.value = sel.options[0].value; loadST(); }
+  else renderSTEmpty();
+};
+
+function getSTKey(yr){ return 'st_'+yr; }
+
+function populateSTYears(){
+  var sel = document.getElementById('stYear');
+  var cur = sel.value;
+  // Find all keys
+  var years = [];
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k && k.startsWith('st_')){ var y=k.replace('st_',''); if(!isNaN(y)) years.push(parseInt(y)); }
+  }
+  // Also check Firebase - for now use localStorage + Firebase
+  years.sort(function(a,b){return b-a;});
+  sel.innerHTML = years.map(function(y){return '<option value="'+y+'">SommerTour '+y+'</option>';}).join('');
+  if(cur) sel.value=cur;
+}
+
+window.newSTYear = function(){
+  var yr = prompt('Angiv årstal for ny SommerTour (fx 2027):');
+  if(!yr || isNaN(yr)) return;
+  yr = parseInt(yr);
+  if(yr < 2020 || yr > 2100){ alert('Ugyldigt årstal.'); return; }
+  var key = getSTKey(yr);
+  if(localStorage.getItem(key)){ alert('SommerTour '+yr+' eksisterer allerede.'); return; }
+  var data = {year:yr, players:[], rounds:[{},{},{}]};
+  // Default players from current players list
+  data.players = players.map(function(p){return {id:p.id,name:p.name};});
+  localStorage.setItem(key, JSON.stringify(data));
+  populateSTYears();
+  document.getElementById('stYear').value = yr;
+  loadST();
+  showAl(document.getElementById('stAlert'),'SommerTour '+yr+' oprettet! ✅','ok');
+};
+
+window.loadST = function(){
+  var yr = document.getElementById('stYear').value;
+  if(!yr){ renderSTEmpty(); return; }
+  stYear = parseInt(yr);
+  var raw = localStorage.getItem(getSTKey(stYear));
+  if(!raw){ renderSTEmpty(); return; }
+  stData = JSON.parse(raw);
+  // Ensure 3 rounds
+  while(stData.rounds.length < 3) stData.rounds.push({});
+  renderSTKpi();
+  renderSTLeaderboard();
+  showSTRound(stRoundIdx, document.getElementById('strtab'+stRoundIdx));
+};
+
+function saveST(){
+  if(!stYear||!stData) return;
+  localStorage.setItem(getSTKey(stYear), JSON.stringify(stData));
+}
+
+function renderSTEmpty(){
+  document.getElementById('stLbBody').innerHTML='<tr><td colspan="6" class="loading">Opret et SommerTour-år med "+ Nyt år" knappen.</td></tr>';
+  document.getElementById('stKpi').innerHTML='';
+  document.getElementById('stRoundDetail').innerHTML='';
+  document.getElementById('stFinaleStart').style.display='none';
+}
+
+function stPlayerTotal(pid, roundIdx){
+  var r = stData.rounds[roundIdx]||{};
+  var pd = r[pid];
+  if(!pd) return null;
+  var f9 = parseInt(pd.f9)||0, b9 = parseInt(pd.b9)||0;
+  return (isNaN(f9)?0:f9)+(isNaN(b9)?0:b9);
+}
+
+function stPlayerGrandTotal(pid){
+  var tot=0, hasAny=false;
+  for(var i=0;i<3;i++){ var t=stPlayerTotal(pid,i); if(t!==null){tot+=t;hasAny=true;} }
+  return hasAny?tot:null;
+}
+
+function renderSTKpi(){
+  var played = stData.rounds.filter(function(r){return Object.keys(r).length>0;}).length;
+  var totalPlayers = stData.players.length;
+  // Leader
+  var ranked = stData.players.map(function(p){return {p:p,tot:stPlayerGrandTotal(p.id)};}).filter(function(x){return x.tot!==null;}).sort(function(a,b){return b.tot-a.tot;});
+  var leaderName = ranked.length?ranked[0].p.name.split(' ')[0]:'–';
+  var leaderTot = ranked.length?ranked[0].tot:'–';
+  document.getElementById('stKpi').innerHTML=
+    '<div class="sc"><div class="lbl">Tour år</div><div class="val">'+stYear+'</div><div class="sub">SommerTour</div></div>'+
+    '<div class="sc"><div class="lbl">Runder spillet</div><div class="val">'+played+'/3</div><div class="sub">Fredag·Lørdag·Søndag</div></div>'+
+    '<div class="sc"><div class="lbl">Deltagere</div><div class="val">'+totalPlayers+'</div><div class="sub">tilmeldt touren</div></div>'+
+    '<div class="sc"><div class="lbl">Fører</div><div class="val" style="font-size:1.1rem;">'+e(leaderName)+'</div><div class="sub">'+leaderTot+' point total</div></div>';
+}
+
+function renderSTLeaderboard(){
+  var ranked = stData.players.map(function(p){
+    var r0=stPlayerTotal(p.id,0), r1=stPlayerTotal(p.id,1), r2=stPlayerTotal(p.id,2);
+    var tot = stPlayerGrandTotal(p.id);
+    return {p:p,r0:r0,r1:r1,r2:r2,tot:tot};
+  }).sort(function(a,b){
+    if(a.tot===null&&b.tot===null) return 0;
+    if(a.tot===null) return 1; if(b.tot===null) return -1;
+    return b.tot-a.tot;
+  });
+  var done = stData.rounds[2] && Object.keys(stData.rounds[2]).length>0;
+  document.getElementById('stLbTitle').textContent = done ? '🏆 Endelig stilling — SommerTour '+stYear : '🏆 Samlet stilling efter '+stData.rounds.filter(function(r){return Object.keys(r).length>0;}).length+' runder';
+  document.getElementById('stLbBody').innerHTML = ranked.map(function(row,i){
+    var rk=i+1, bc=rk<=3?'r'+rk:'rx';
+    var r0=row.r0!==null?row.r0:'–', r1=row.r1!==null?row.r1:'–', r2=row.r2!==null?row.r2:'–';
+    var tot=row.tot!==null?'<span class="sg">'+row.tot+'</span>':'–';
+    var crown = done&&rk===1?' 👑':'';
+    return '<tr><td><span class="rb '+bc+'">'+rk+'</span></td>'+
+      '<td><span class="pn">'+e(row.p.name)+crown+'</span></td>'+
+      '<td class="r"><span class="sb">'+r0+'</span></td>'+
+      '<td class="r"><span class="sb">'+r1+'</span></td>'+
+      '<td class="r"><span class="sb">'+r2+'</span></td>'+
+      '<td class="r">'+tot+'</td></tr>';
+  }).join('');
+}
+
+window.showSTRound = function(idx, btn){
+  stRoundIdx = idx;
+  document.querySelectorAll('.strtab').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  if(!stData){ renderSTEmpty(); return; }
+  renderSTRoundDetail(idx);
+  // Show startlist for finale
+  var fs = document.getElementById('stFinaleStart');
+  if(idx===2){ renderFinaleStartlist(); fs.style.display='block'; }
+  else fs.style.display='none';
+};
+
+function renderSTRoundDetail(idx){
+  var el = document.getElementById('stRoundDetail');
+  if(!stData||!stData.players.length){ el.innerHTML='<p style="color:var(--mt)">Ingen spillere tilmeldt touren.</p>'; return; }
+  var roundName = ST_LABELS[idx];
+  el.innerHTML = '<div class="card" style="margin-bottom:14px;"><div class="ch">'+roundName+' — Score indtastning</div>'+
+    '<div style="padding:14px;"><p style="font-size:.75rem;color:var(--mt);font-family:\'DM Mono\',monospace;margin-bottom:12px;">ANGIV FOR9 OG BAG9 FOR HVER DELTAGER — TOTAL BEREGNES AUTOMATISK</p>'+
+    '<div class="st-round-grid" id="stPlayerCards"></div>'+
+    '<button class="btn" onclick="saveSTRound('+idx+')" style="margin-top:8px;">💾 Gem '+roundName+'</button>'+
+    '</div></div>';
+  // Render player cards
+  var cards = stData.players.map(function(p){
+    var r = stData.rounds[idx]||{};
+    var pd = r[p.id]||{f9:'',b9:''};
+    var f9=pd.f9!==undefined?pd.f9:'', b9=pd.b9!==undefined?pd.b9:'';
+    var tot = (parseInt(f9)||0)+(parseInt(b9)||0);
+    var totTxt = (f9!==''||b9!=='')?tot:'–';
+    return '<div class="st-player-card">'+
+      '<div class="spname">'+e(p.name)+'</div>'+
+      '<div class="st-score-row"><span class="slbl">For 9</span><input type="number" id="stf9_'+idx+'_'+p.id+'" value="'+f9+'" min="0" max="54" placeholder="–" oninput="calcSTTotal('+idx+',\''+p.id+'\')" /></div>'+
+      '<div class="st-score-row"><span class="slbl">Bag 9</span><input type="number" id="stb9_'+idx+'_'+p.id+'" value="'+b9+'" min="0" max="54" placeholder="–" oninput="calcSTTotal('+idx+',\''+p.id+'\')" /></div>'+
+      '<div class="st-total" id="sttot_'+idx+'_'+p.id+'">'+totTxt+'</div>'+
+      '</div>';
+  }).join('');
+  document.getElementById('stPlayerCards').innerHTML = cards;
+}
+
+window.calcSTTotal = function(idx, pid){
+  var f9 = parseInt(document.getElementById('stf9_'+idx+'_'+pid).value)||0;
+  var b9 = parseInt(document.getElementById('stb9_'+idx+'_'+pid).value)||0;
+  var el = document.getElementById('sttot_'+idx+'_'+pid);
+  if(el) el.textContent = (f9+b9)||'–';
+};
+
+window.saveSTRound = function(idx){
+  if(!stData) return;
+  if(!stData.rounds[idx]) stData.rounds[idx]={};
+  var saved=0;
+  stData.players.forEach(function(p){
+    var f9i = document.getElementById('stf9_'+idx+'_'+p.id);
+    var b9i = document.getElementById('stb9_'+idx+'_'+p.id);
+    if(!f9i||!b9i) return;
+    var f9=f9i.value, b9=b9i.value;
+    if(f9!==''||b9!==''){
+      stData.rounds[idx][p.id]={f9:f9!==''?parseInt(f9):null, b9:b9!==''?parseInt(b9):null};
+      saved++;
+    }
+  });
+  saveST();
+  renderSTKpi();
+  renderSTLeaderboard();
+  showAl(document.getElementById('stAlert'), ST_LABELS[idx]+' gemt for '+saved+' spillere! ✅','ok');
+  sendNotif('⛳ SommerTour score gemt!', ST_LABELS[idx]+' scores er opdateret.');
+};
+
+function renderFinaleStartlist(){
+  // Sort by total after 2 rounds (friday + saturday)
+  var ranked = stData.players.map(function(p){
+    var r0=stPlayerTotal(p.id,0)||0, r1=stPlayerTotal(p.id,1)||0;
+    var tot = r0+r1;
+    return {p:p,tot:tot};
+  }).sort(function(a,b){return a.tot-b.tot;}); // worst first
+
+  var n = ranked.length;
+  var groups = [];
+  // Last 4 = førerbold
+  var rest = ranked.slice(0, n-4);
+  var lead = ranked.slice(n-4);
+  // Split rest into groups of 4
+  for(var i=0;i<rest.length;i+=4){
+    groups.push({title:'Gruppe '+(Math.floor(i/4)+1), players:rest.slice(i,i+4), gold:false});
+  }
+  groups.push({title:'🏆 Førerbolden (Top 4)', players:lead, gold:true});
+
+  var html = groups.map(function(g){
+    return '<div class="finale-group '+(g.gold?'gold':'')+' ">'+
+      '<div class="finale-group-title">'+g.title+' — starter '+(g.gold?'sidst (Førerbolden)':'tidligt')+'</div>'+
+      g.players.map(function(x,i){
+        return '<div class="finale-player"><span>'+(i+1)+'. '+e(x.p.name)+'</span><span style="font-family:\'DM Mono\',monospace;font-size:.8rem;color:var(--go);">'+x.tot+' point</span></div>';
+      }).join('')+
+      '</div>';
+  }).join('');
+  document.getElementById('stFinaleBody').innerHTML = html || '<p style="color:var(--mt)">Indtast Fredag og Lørdag scores for at se startlisten.</p>';
+}
+
+// ADMIN MODAL
+window.openSTAdmin = function(){
+  if(!stYear){ alert('Vælg et SommerTour-år først.'); return; }
+  var plist = players.map(function(p){
+    var enrolled = stData.players.find(function(x){return x.id===p.id;});
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);">'+
+      '<input type="checkbox" id="ste_'+p.id+'" '+(enrolled?'checked':'')+' style="accent-color:var(--gb);width:16px;height:16px;"/>'+
+      '<label for="ste_'+p.id+'" style="font-size:.88rem;">'+e(p.name)+'</label></div>';
+  }).join('');
+  var modal = document.createElement('div');
+  modal.className='mo open'; modal.id='stAdminMo';
+  modal.innerHTML='<div class="md" style="max-width:400px;">'+
+    '<h3>⚙️ Administrer SommerTour '+stYear+'</h3>'+
+    '<p style="font-size:.8rem;color:var(--mt);margin-bottom:12px;">Vælg hvilke spillere der deltager i touren.</p>'+
+    '<div style="max-height:300px;overflow-y:auto;border:1px solid var(--bd);border-radius:8px;padding:8px 14px;">'+plist+'</div>'+
+    '<div class="ma">'+
+    '<button class="btn" onclick="saveSTAdmin()">💾 Gem deltagere</button>'+
+    '<button class="btn btn-s" onclick="closeSTAdmin()">Annuller</button>'+
+    '</div></div>';
+  modal.addEventListener('click',function(ev){if(ev.target===modal)closeSTAdmin();});
+  document.body.appendChild(modal);
+};
+
+window.saveSTAdmin = function(){
+  stData.players = players.filter(function(p){
+    var cb=document.getElementById('ste_'+p.id); return cb&&cb.checked;
+  }).map(function(p){return {id:p.id,name:p.name};});
+  saveST(); closeSTAdmin();
+  renderSTKpi(); renderSTLeaderboard();
+  showSTRound(stRoundIdx, document.getElementById('strtab'+stRoundIdx));
+  showAl(document.getElementById('stAlert'),'Deltagerliste opdateret! ✅','ok');
+};
+
+window.closeSTAdmin = function(){
+  var m=document.getElementById('stAdminMo'); if(m) m.remove();
+};
+
+// Hook into showTab
+var _origShowTab = window.showTab;
+window.showTab = function(t, b){
+  _origShowTab(t,b);
+  if(t==='sommertour') showTab_ST();
+};
+
+// Auto-create current year if none exists
+setTimeout(function(){
+  var sel=document.getElementById('stYear');
+  if(sel && sel.options.length===0){
+    var yr = new Date().getFullYear();
+    var key = getSTKey(yr);
+    if(!localStorage.getItem(key)){
+      var data={year:yr,players:players.map(function(p){return {id:p.id,name:p.name};}),rounds:[{},{},{}]};
+      localStorage.setItem(key, JSON.stringify(data));
+      populateSTYears();
+    }
+  }
+}, 2000);
+
+
+window.genindlaesSpillere = async function(){
+  if(!confirm('Dette opretter alle 16 standardspillere i databasen.
+
+Brug kun hvis spillerlisten er tom eller forkert!
+
+Fortsæt?')) return;
+  var snap = await getDocs(collection(db,'Players'));
+  if(snap.size > 0){
+    if(!confirm('Der er allerede '+snap.size+' spillere i databasen.
+Vil du stadig fortsætte? Det kan skabe dubletter!')) return;
+  }
+  var liste = [
+    {name:'Brian Arnsbæk',hcp:10.7},{name:'Claus Berg',hcp:13.1},{name:'Frank Oltmann',hcp:25.7},
+    {name:'Frank Pedersen',hcp:15.6},{name:'Gert Olesen',hcp:17.6},{name:'Henrik Berg',hcp:20.5},
+    {name:'John Fjord',hcp:14.6},{name:'John Fritsen',hcp:18.7},{name:'Kent Olesen',hcp:14.1},
+    {name:'Klaus Bøllund',hcp:18.9},{name:'Michael Berg',hcp:18.5},{name:'Peter Berg',hcp:24.1},
+    {name:'Steen Olesen',hcp:24.9},{name:'Søren Blicher',hcp:20.5},{name:'Thomas Hyttel',hcp:12.8},
+    {name:'Torben Leth',hcp:15.8}
+  ];
+  showAl(document.getElementById('sal'),'Opretter spillere...','ok');
+  for(var i=0;i<liste.length;i++){
+    await setDoc(doc(collection(db,'Players')),liste[i]);
+  }
+  showAl(document.getElementById('sal'),'✅ Alle 16 spillere er oprettet!','ok');
+};
+</script>
+</body>
+</html>
